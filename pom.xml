@@ -12,10 +12,10 @@
 	</parent>
 
 	<groupId>org.delcom</groupId>
-	<artifactId>spring-todos</artifactId>
+	<artifactId>food-ordering-system</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Spring Todos</name>
-	<description>Todo Application with Spring Boot</description>
+	<name>Food Ordering System</name>
+	<description>Food Ordering System Application with Spring Boot</description>
 
 	<properties>
 		<java.version>25</java.version>
@@ -149,14 +149,14 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>${maven.dependency.jjwt.version}</version>
+			<version>0.12.6</version>
 		</dependency>
 
 		<!-- Dependency for JWT Implementation -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>${maven.dependency.jjwt.version}</version>
+			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -164,7 +164,7 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>${maven.dependency.jjwt.version}</version>
+			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
