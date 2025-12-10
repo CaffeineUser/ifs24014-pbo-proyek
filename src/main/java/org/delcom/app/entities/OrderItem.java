@@ -3,6 +3,8 @@ package org.delcom.app.entities;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "order_items")
 public class OrderItem {
@@ -12,6 +14,7 @@ public class OrderItem {
     
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnore
     private Order order;
     
     @ManyToOne

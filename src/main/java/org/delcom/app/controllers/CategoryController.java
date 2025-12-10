@@ -40,9 +40,7 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
-    // =================================================================
     // ADMIN ONLY ENDPOINTS (Dilindungi oleh @RequireRole)
-    // =================================================================
 
     /**
      * Tambah Kategori Baru.

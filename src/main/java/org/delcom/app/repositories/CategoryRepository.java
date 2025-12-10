@@ -10,23 +10,20 @@ import java.util.List;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     
-    // Find category by name
     Category findByName(String name);
     
-    // Find categories by name containing (search)
     List<Category> findByNameContainingIgnoreCase(String name);
     
-    // Find all categories ordered by name
     List<Category> findAllByOrderByNameAsc();
     
-    // Custom query: Get categories with menu items count
+    // Query ini yang sebelumnya ERROR. Sekarang akan berhasil karena
+    // field 'menuItems' sudah ada di Entity Category.
     @Query("SELECT c, COUNT(m) FROM Category c LEFT JOIN c.menuItems m WHERE m.available = true GROUP BY c")
     List<Object[]> findCategoriesWithItemCount();
     
-    // Check if category exists by name
     boolean existsByName(String name);
     
-    // Find categories with available menu items
+    // Query ini juga akan berhasil sekarang
     @Query("SELECT DISTINCT c FROM Category c JOIN c.menuItems m WHERE m.available = true")
     List<Category> findCategoriesWithAvailableItems();
 }

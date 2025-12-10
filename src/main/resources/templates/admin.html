@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Food Ordering</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden flex text-gray-800">
+
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-slate-900 text-white flex flex-col shadow-2xl z-20 transition-all duration-300">
+        <div class="p-8 flex items-center gap-4 border-b border-slate-800">
+            <div class="bg-gradient-to-br from-orange-500 to-red-600 p-3 rounded-xl shadow-lg shadow-orange-500/30">
+                <i class="fa-solid fa-burger text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">Delcom<span class="text-orange-500">Food</span></h1>
+                <p class="text-xs text-slate-400 uppercase tracking-widest">Admin Panel</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-6 space-y-2 overflow-y-auto">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 pl-2">Menu Utama</p>
+            
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group hover:bg-slate-800">
+                <i class="fa-solid fa-chart-pie w-5 text-slate-400 group-hover:text-orange-500 transition-colors"></i>
+                <span class="font-medium">Overview</span>
+            </button>
+
+            <button onclick="switchTab('orders')" id="nav-orders" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group hover:bg-slate-800">
+                <i class="fa-solid fa-clipboard-list w-5 text-slate-400 group-hover:text-orange-500 transition-colors"></i>
+                <span class="font-medium">Pesanan Masuk</span>
+            </button>
+            
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-8 mb-4 pl-2">Manajemen</p>
+
+            <button onclick="switchTab('menu')" id="nav-menu" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group hover:bg-slate-800">
+                <i class="fa-solid fa-utensils w-5 text-slate-400 group-hover:text-orange-500 transition-colors"></i>
+                <span class="font-medium">Daftar Menu</span>
+            </button>
+            
+            <button onclick="switchTab('categories')" id="nav-categories" class="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group hover:bg-slate-800">
+                <i class="fa-solid fa-tags w-5 text-slate-400 group-hover:text-orange-500 transition-colors"></i>
+                <span class="font-medium">Kategori</span>
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-slate-800">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 shadow-lg">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="font-medium">Keluar</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white/80 backdrop-blur-md shadow-sm h-20 flex items-center px-8 justify-between sticky top-0 z-10">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800" id="page-title">Dashboard Overview</h2>
+                <p class="text-sm text-slate-500">Selamat datang kembali, Admin!</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-4 ring-orange-50">
+                    A
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-8" id="content-area">
+            
+            <!-- 1. TAB DASHBOARD (GRAFIK) -->
+            <div id="view-dashboard" class="space-y-8 fade-in">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl p-6 text-white shadow-xl shadow-blue-200 transform hover:-translate-y-1 transition duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-blue-100 text-sm font-medium mb-1">Total Pendapatan</p>
+                                <h3 class="text-3xl font-bold" id="stat-revenue">Rp 0</h3>
+                            </div>
+                            <div class="bg-white/20 p-3 rounded-lg"><i class="fas fa-wallet text-2xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-500 to-amber-400 rounded-2xl p-6 text-white shadow-xl shadow-orange-200 transform hover:-translate-y-1 transition duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-orange-100 text-sm font-medium mb-1">Pesanan Hari Ini</p>
+                                <h3 class="text-3xl font-bold" id="stat-orders-today">0</h3>
+                            </div>
+                            <div class="bg-white/20 p-3 rounded-lg"><i class="fas fa-shopping-bag text-2xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-500 to-teal-400 rounded-2xl p-6 text-white shadow-xl shadow-emerald-200 transform hover:-translate-y-1 transition duration-300">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-emerald-100 text-sm font-medium mb-1">Total Selesai</p>
+                                <h3 class="text-3xl font-bold" id="stat-orders-total">0</h3>
+                            </div>
+                            <div class="bg-white/20 p-3 rounded-lg"><i class="fas fa-check-circle text-2xl"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Grafik Penjualan (Lebar) -->
+                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="font-bold text-slate-700 text-lg">Tren Pendapatan</h4>
+                            <span class="text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full">30 Hari Terakhir</span>
+                        </div>
+                        <div class="h-80 relative w-full">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Grafik Menu Terlaris (Kecil) -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold text-slate-700 text-lg mb-6">Menu Favorit</h4>
+                        <div class="h-64 relative flex justify-center items-center">
+                            <canvas id="topItemsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. TAB PESANAN -->
+            <div id="view-orders" class="hidden space-y-6 fade-in">
+                <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-bold text-slate-700 ml-2">Antrian Pesanan</h3>
+                    <button onclick="loadOrders()" class="text-sm bg-slate-50 text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh Data
+                    </button>
+                </div>
+                <div id="orders-list" class="grid gap-4"></div>
+            </div>
+
+            <!-- 3. TAB MENU -->
+            <div id="view-menu" class="hidden space-y-6 fade-in">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-slate-700">Daftar Menu</h3>
+                    <button onclick="openMenuModal()" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-green-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Menu
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-600 uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Produk</th>
+                                <th class="px-6 py-4 font-semibold">Info Detail</th>
+                                <th class="px-6 py-4 font-semibold">Kategori</th>
+                                <th class="px-6 py-4 font-semibold">Harga</th>
+                                <th class="px-6 py-4 font-semibold text-center">Status</th>
+                                <th class="px-6 py-4 font-semibold text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menu-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. TAB KATEGORI -->
+            <div id="view-categories" class="hidden space-y-6 fade-in">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-slate-700">Manajemen Kategori</h3>
+                    <button onclick="openCategoryModal()" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Kategori
+                    </button>
+                </div>
+                <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. MODAL TAMBAH MENU -->
+    <div id="menuModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 transition-opacity p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-0 overflow-hidden slide-up">
+            <div class="bg-gradient-to-r from-orange-500 to-red-500 p-6 text-white flex justify-between items-center">
+                <h3 class="font-bold text-xl">Tambah Menu Baru</h3>
+                <button onclick="closeMenuModal()" class="text-white/80 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="addMenuForm" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Menu</label>
+                    <input type="text" name="name" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition" required placeholder="Contoh: Nasi Goreng Spesial">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Harga (Rp)</label>
+                        <input type="number" name="price" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500 outline-none transition" required placeholder="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kategori</label>
+                        <select name="categoryId" id="categorySelect" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500 outline-none transition bg-white" required></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Deskripsi</label>
+                    <textarea name="description" rows="2" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-orange-500 outline-none transition" required placeholder="Deskripsi menu..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Upload Foto</label>
+                    <input type="file" name="image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 transition cursor-pointer">
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeMenuModal()" class="px-5 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-orange-600 text-white font-bold rounded-lg shadow-lg hover:bg-orange-700 transition transform active:scale-95">Simpan Menu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. MODAL EDIT MENU -->
+    <div id="editMenuModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-0 overflow-hidden slide-up">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white flex justify-between items-center">
+                <h3 class="font-bold text-xl">Edit Menu</h3>
+                <button onclick="closeEditMenuModal()" class="text-white/80 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="editMenuForm" class="p-6 space-y-5">
+                <input type="hidden" id="editMenuId" name="id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Menu</label>
+                    <input type="text" id="editMenuName" name="name" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kategori</label>
+                        <select id="editMenuCategoryId" name="categoryId" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white" required></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Harga</label>
+                        <input type="number" id="editMenuPrice" name="price" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Status</label>
+                    <select id="editMenuAvailable" name="available" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none bg-white" required>
+                        <option value="true">Tersedia</option>
+                        <option value="false">Habis</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Deskripsi</label>
+                    <textarea id="editMenuDescription" name="description" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" required></textarea>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Foto Saat Ini</label>
+                    <div class="flex items-center gap-4">
+                        <img id="currentMenuImage" class="w-16 h-16 object-cover rounded-lg border border-slate-300 bg-white">
+                        <div class="flex-1">
+                            <p class="text-xs text-slate-500 mb-1">Ganti Foto (Opsional)</p>
+                            <input type="file" name="image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="closeEditMenuModal()" class="px-5 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg shadow hover:bg-blue-700 transition">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. MODAL TAMBAH & EDIT KATEGORI -->
+    <div id="addCategoryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 slide-up">
+            <h3 class="font-bold text-xl text-slate-800 mb-4 border-b pb-2">Tambah Kategori</h3>
+            <form id="addCategoryForm" class="space-y-4">
+                <input type="text" name="name" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" required placeholder="Nama Kategori">
+                <textarea name="description" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Deskripsi"></textarea>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" onclick="document.getElementById('addCategoryModal').classList.add('hidden')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editCategoryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 slide-up">
+            <h3 class="font-bold text-xl text-slate-800 mb-4 border-b pb-2">Edit Kategori</h3>
+            <form id="editCategoryForm" class="space-y-4">
+                <input type="hidden" id="editCategoryId">
+                <input type="text" id="editCategoryName" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                <textarea id="editCategoryDescription" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" onclick="document.getElementById('editCategoryModal').classList.add('hidden')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let salesChartInstance = null;
+        let topItemsChartInstance = null;
+
+        // === 1. NAVIGASI TAB ===
+        function switchTab(tab) {
+            ['dashboard', 'orders', 'menu', 'categories'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`nav-${t}`);
+                btn.className = "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group hover:bg-slate-800";
+                btn.querySelector('i').classList.remove('text-orange-500');
+                btn.querySelector('i').classList.add('text-slate-400');
+                btn.classList.remove('bg-slate-800', 'text-white');
+                btn.classList.add('text-slate-300');
+            });
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tab}`);
+            activeBtn.className = "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-500/20";
+            activeBtn.querySelector('i').classList.remove('text-slate-400', 'group-hover:text-orange-500');
+            activeBtn.querySelector('i').classList.add('text-white');
+
+            const titles = { 'dashboard': 'Dashboard Overview', 'orders': 'Pesanan Masuk', 'menu': 'Manajemen Menu', 'categories': 'Kategori Menu' };
+            document.getElementById('page-title').innerText = titles[tab];
+
+            if(tab === 'dashboard') loadDashboardStats();
+            if(tab === 'orders') loadOrders();
+            if(tab === 'menu') loadMenu();
+            if(tab === 'categories') loadCategories();
+        }
+
+        // === 2. DASHBOARD ===
+        async function loadDashboardStats() {
+            try {
+                const summaryRes = await fetch('/api/admin/dashboard/summary');
+                if (summaryRes.ok) {
+                    const data = await summaryRes.json();
+                    document.getElementById('stat-revenue').textContent = `Rp ${(data.totalRevenue || 0).toLocaleString('id-ID')}`;
+                    document.getElementById('stat-orders-today').textContent = data.todayOrderCount || 0;
+                    document.getElementById('stat-orders-total').textContent = data.completedOrders || 0;
+                }
+
+                const endDate = new Date().toISOString();
+                const startDate = new Date(new Date().setDate(new Date().getDate() - 30)).toISOString();
+                const chartRes = await fetch(`/api/admin/dashboard/chart/sales?startDate=${startDate}&endDate=${endDate}`);
+                if (chartRes.ok) renderSalesChart(await chartRes.json());
+
+                const topRes = await fetch('/api/admin/dashboard/top-items');
+                if (topRes.ok) renderTopItemsChart(await topRes.json());
+            } catch (e) {}
+        }
+
+        function renderSalesChart(data) {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const sortedData = data.reverse(); 
+            if (salesChartInstance) salesChartInstance.destroy();
+            
+            // Gradient Fill Effect
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(234, 88, 12, 0.2)'); // Orange transparent
+            gradient.addColorStop(1, 'rgba(234, 88, 12, 0)');   // Transparent
+
+            salesChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedData.map(d => new Date(d.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})),
+                    datasets: [{
+                        label: 'Pendapatan',
+                        data: sortedData.map(d => d.sales),
+                        borderColor: '#ea580c',
+                        backgroundColor: gradient,
+                        fill: true, 
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#ea580c',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID', {notation: "compact"});
+                                }
+                            },
+                            grid: { borderDash: [2, 4] }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function renderTopItemsChart(data) {
+            const ctx = document.getElementById('topItemsChart').getContext('2d');
+            if (topItemsChartInstance) topItemsChartInstance.destroy();
+            topItemsChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.menuName),
+                    datasets: [{ 
+                        data: data.map(d => d.totalSold), 
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'right', labels: { usePointStyle: true } } } 
+                }
+            });
+        }
+
+        // === 3. ORDERS ===
+        async function loadOrders() {
+            const container = document.getElementById('orders-list');
+            try {
+                const res = await fetch('/api/orders/admin/search');
+                if(!res.ok) throw new Error();
+                const orders = await res.json();
+                if(orders.length === 0) { container.innerHTML = `<p class="text-center text-slate-400 py-10">Belum ada pesanan.</p>`; return; }
+
+                container.innerHTML = orders.map(order => {
+                    // Logic Foto Profil User
+                    let avatarSrc;
+                    if (order.user && order.user.profileImage) {
+                        avatarSrc = order.user.profileImage.startsWith('http') ? order.user.profileImage : `/uploads/${order.user.profileImage}`;
+                    } else {
+                        const name = order.customerName || 'Pelanggan';
+                        avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128`;
+                    }
+
+                    return `
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-4">
+                                <img src="${avatarSrc}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md bg-slate-100" onerror="this.src='https://ui-avatars.com/api/?name=User'">
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg">${order.customerName || 'Pelanggan'}</h4>
+                                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                                        <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-mono">${order.orderNumber}</span>
+                                        <span>• ${new Date(order.orderDate).toLocaleString('id-ID')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="px-4 py-1.5 rounded-full text-xs font-bold shadow-sm ${getStatusColor(order.status)}">${order.status}</span>
+                        </div>
+                        
+                        <div class="ml-16">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm mb-4">
+                                <div class="space-y-2 mb-3">
+                                    ${order.items.map(i => `
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-slate-700"><span class="font-bold">${i.quantity}x</span> ${i.menuItem.name}</span>
+                                            <span class="text-slate-500">Rp ${i.priceAtOrder.toLocaleString('id-ID')}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="border-t border-slate-200 pt-3 flex justify-between font-bold text-slate-800 text-base">
+                                    <span>Total</span><span>Rp ${order.totalAmount.toLocaleString('id-ID')}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-4 text-sm text-slate-600 mb-4">
+                                <div class="flex gap-2 items-center"><i class="fa-solid fa-location-dot text-orange-500"></i> ${order.deliveryAddress}</div>
+                                <div class="flex gap-2 items-center"><i class="fa-solid fa-phone text-green-500"></i> ${order.customerPhone}</div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                ${renderOrderActions(order)}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch(e) { container.innerHTML = '<p class="text-center text-red-500">Gagal memuat order.</p>'; }
+        }
+
+        // Logic Tombol Status Dinamis
+        function renderOrderActions(order) {
+            if (order.status === 'PENDING') {
+                return `
+                    <button onclick="updateStatus('${order.id}', 'CONFIRMED')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition flex items-center gap-2"><i class="fas fa-check"></i> Terima</button>
+                    <button onclick="updateStatus('${order.id}', 'CANCELLED')" class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2"><i class="fas fa-times"></i> Tolak</button>
+                `;
+            } else if (order.status === 'CONFIRMED') {
+                return `<button onclick="updateStatus('${order.id}', 'PREPARING')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition flex items-center gap-2"><i class="fas fa-fire"></i> Mulai Masak</button>`;
+            } else if (order.status === 'PREPARING') {
+                return `<button onclick="updateStatus('${order.id}', 'DELIVERING')" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition flex items-center gap-2"><i class="fas fa-motorcycle"></i> Kirim Pesanan</button>`;
+            } else if (order.status === 'DELIVERING') {
+                return `<button onclick="updateStatus('${order.id}', 'COMPLETED')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition flex items-center gap-2"><i class="fas fa-flag-checkered"></i> Selesai</button>`;
+            }
+            return '';
+        }
+
+        function getStatusColor(status) {
+            const map = {
+                'PENDING': 'bg-amber-100 text-amber-700 border border-amber-200',
+                'CONFIRMED': 'bg-blue-100 text-blue-700 border border-blue-200',
+                'PREPARING': 'bg-purple-100 text-purple-700 border border-purple-200',
+                'DELIVERING': 'bg-orange-100 text-orange-700 border border-orange-200',
+                'COMPLETED': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+                'CANCELLED': 'bg-red-100 text-red-700 border border-red-200'
+            };
+            return map[status] || 'bg-slate-100 text-slate-700';
+        }
+
+        async function updateStatus(id, status) {
+            const result = await Swal.fire({
+                title: 'Konfirmasi Perubahan',
+                text: `Ubah status pesanan menjadi ${status}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ea580c',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Lanjutkan'
+            });
+
+            if(!result.isConfirmed) return;
+
+            try {
+                await fetch(`/api/orders/${id}/status`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({status: status})
+                });
+                loadOrders(); 
+                loadDashboardStats();
+                Swal.fire('Berhasil', 'Status pesanan diperbarui', 'success');
+            } catch(e) {
+                Swal.fire('Error', 'Gagal update status', 'error');
+            }
+        }
+
+        // === 4. MENU ===
+        async function loadMenu() {
+            const tbody = document.getElementById('menu-table-body');
+            try {
+                const res = await fetch('/api/menu');
+                const menus = await res.json();
+                
+                tbody.innerHTML = menus.map(m => {
+                    const img = m.imageUrl ? (m.imageUrl.startsWith('http') ? m.imageUrl : `/uploads/${m.imageUrl}`) : 'https://placehold.co/100';
+                    return `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50">
+                        <td class="px-6 py-4"><img src="${img}" class="w-14 h-14 object-cover rounded-xl shadow-sm border border-slate-200"></td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-800 text-base">${m.name}</div>
+                            <div class="text-xs text-slate-500 truncate w-48">${m.description}</div>
+                        </td>
+                        <td class="px-6 py-4"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-blue-100">${m.category ? m.category.name : '-'}</span></td>
+                        <td class="px-6 py-4 font-bold text-slate-700">Rp ${m.price.toLocaleString('id-ID')}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${m.available ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-red-100 text-red-700 border border-red-200'}">
+                                ${m.available ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Tersedia' : '<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Habis'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="openEditMenuModal(${m.id})" class="text-slate-400 hover:text-blue-500 transition p-2 bg-slate-50 hover:bg-blue-50 rounded-lg mr-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteMenu(${m.id})" class="text-slate-400 hover:text-red-500 transition p-2 bg-slate-50 hover:bg-red-50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch(e) {}
+        }
+
+        function openMenuModal() { document.getElementById('menuModal').classList.remove('hidden'); loadCategoriesForDropdown('categorySelect'); }
+        function closeMenuModal() { document.getElementById('menuModal').classList.add('hidden'); document.getElementById('addMenuForm').reset(); }
+        document.getElementById('addMenuForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); const formData = new FormData(this);
+            await fetch('/api/menu', { method: 'POST', body: formData });
+            closeMenuModal(); loadMenu(); Swal.fire('Sukses', 'Menu ditambahkan', 'success');
+        });
+
+        async function openEditMenuModal(id) {
+            const res = await fetch(`/api/menu/${id}`); const menu = await res.json();
+            document.getElementById('editMenuId').value = menu.id;
+            document.getElementById('editMenuName').value = menu.name;
+            document.getElementById('editMenuDescription').value = menu.description || '';
+            document.getElementById('editMenuPrice').value = menu.price;
+            document.getElementById('editMenuAvailable').value = menu.available;
+            await loadCategoriesForDropdown('editMenuCategoryId');
+            if(menu.category) document.getElementById('editMenuCategoryId').value = menu.category.id;
+            
+            const img = document.getElementById('currentMenuImage');
+            if(menu.imageUrl) {
+                img.src = menu.imageUrl.startsWith('http') ? menu.imageUrl : `/uploads/${menu.imageUrl}`;
+                img.classList.remove('hidden');
+            } else img.classList.add('hidden');
+            
+            document.getElementById('editMenuModal').classList.remove('hidden');
+        }
+        function closeEditMenuModal() { document.getElementById('editMenuModal').classList.add('hidden'); }
+        document.getElementById('editMenuForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editMenuId').value;
+            const formData = new FormData(this);
+            await fetch(`/api/menu/${id}`, { method: 'PUT', body: formData });
+            closeEditMenuModal(); loadMenu(); Swal.fire('Sukses', 'Menu diupdate', 'success');
+        });
+        async function deleteMenu(id) {
+            if(confirm('Hapus?')) { await fetch(`/api/menu/${id}`, { method: 'DELETE' }); loadMenu(); }
+        }
+
+        // === 5. KATEGORI ===
+        async function loadCategories() {
+            const res = await fetch('/api/categories'); const data = await res.json();
+            document.getElementById('categories-grid').innerHTML = data.map(c => `
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition duration-300 group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm group-hover:scale-110 transition duration-300"><i class="fa-solid fa-tag text-xl"></i></div>
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition duration-300">
+                            <button onclick="openEditCategoryModal(${c.id})" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-blue-600 transition"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteCategory(${c.id})" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-red-600 transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-lg mb-1">${c.name}</h4>
+                    <p class="text-sm text-slate-500 line-clamp-2">${c.description || 'Tidak ada deskripsi'}</p>
+                </div>
+            `).join('');
+        }
+        function openCategoryModal() { document.getElementById('addCategoryModal').classList.remove('hidden'); }
+        document.getElementById('addCategoryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = { name: this.name.value, description: this.description.value };
+            await fetch('/api/categories', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            document.getElementById('addCategoryModal').classList.add('hidden'); this.reset(); loadCategories(); Swal.fire('Sukses', 'Kategori ditambahkan', 'success');
+        });
+        async function openEditCategoryModal(id) {
+            const res = await fetch(`/api/categories/${id}`); const c = await res.json();
+            document.getElementById('editCategoryId').value = c.id;
+            document.getElementById('editCategoryName').value = c.name;
+            document.getElementById('editCategoryDescription').value = c.description;
+            document.getElementById('editCategoryModal').classList.remove('hidden');
+        }
+        document.getElementById('editCategoryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editCategoryId').value;
+            const data = { name: document.getElementById('editCategoryName').value, description: document.getElementById('editCategoryDescription').value };
+            await fetch(`/api/categories/${id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+            document.getElementById('editCategoryModal').classList.add('hidden'); loadCategories(); Swal.fire('Sukses', 'Kategori diupdate', 'success');
+        });
+        async function deleteCategory(id) {
+            if(confirm('Hapus kategori?')) { await fetch(`/api/categories/${id}`, { method: 'DELETE' }); loadCategories(); }
+        }
+
+        async function loadCategoriesForDropdown(id) {
+            const res = await fetch('/api/categories'); const data = await res.json();
+            const sel = document.getElementById(id); sel.innerHTML = '<option value="">Pilih...</option>';
+            data.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.innerText = c.name; sel.appendChild(o); });
+        }
+        async function logout() { await fetch('/api/auth/logout', {method:'POST'}); window.location.href='/login'; }
+
+        // Start
+        switchTab('dashboard');
+    </script>
+</body>
+</html>

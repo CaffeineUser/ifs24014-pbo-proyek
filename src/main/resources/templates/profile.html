@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Saya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style> body { font-family: 'Poppins', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- NAVBAR SEDERHANA -->
+    <nav class="bg-white shadow p-4 mb-8">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-orange-600 font-bold text-xl"><i class="fa-solid fa-arrow-left"></i> Kembali ke Home</a>
+            <h1 class="font-bold text-gray-700">Pengaturan Akun</h1>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 pb-12">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+            
+            <!-- BAGIAN KIRI: FOTO -->
+            <div class="w-full md:w-1/3 bg-orange-50 p-8 flex flex-col items-center justify-center text-center border-r border-gray-100">
+                <div class="relative group">
+                    <img id="profile-preview" src="https://placehold.co/150" 
+                         class="w-40 h-40 rounded-full object-cover border-4 border-white shadow-md mb-4">
+                    
+                    <label for="file-input" class="absolute bottom-4 right-2 bg-gray-900 text-white p-2 rounded-full cursor-pointer hover:bg-orange-600 transition shadow-lg">
+                        <i class="fa-solid fa-camera"></i>
+                    </label>
+                    <input type="file" id="file-input" class="hidden" accept="image/*" onchange="previewImage(event)">
+                </div>
+                
+                <h2 class="text-xl font-bold text-gray-800" id="display-name">Loading...</h2>
+                <p class="text-sm text-gray-500" id="display-email">...</p>
+                <span class="mt-2 px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-full" id="display-role">CUSTOMER</span>
+            </div>
+
+            <!-- BAGIAN KANAN: FORM -->
+            <div class="w-full md:w-2/3 p-8">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">Edit Biodata</h3>
+                
+                <form id="profileForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                            <input type="text" name="name" id="name" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">No. Handphone</label>
+                            <input type="text" name="phone" id="phone" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Lengkap</label>
+                        <textarea name="address" id="address" rows="3" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+                    </div>
+
+                    <div class="pt-4 flex justify-end">
+                        <button type="submit" class="bg-orange-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-700 transition shadow-md">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load Data Profil Saat Halaman Dibuka
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/user/profile');
+                if(!res.ok) window.location.href = '/login';
+                
+                const user = await res.json();
+                
+                // Isi Form
+                document.getElementById('name').value = user.name;
+                document.getElementById('phone').value = user.phone || '';
+                document.getElementById('address').value = user.address || '';
+                
+                // Isi Tampilan Kiri
+                document.getElementById('display-name').innerText = user.name;
+                document.getElementById('display-email').innerText = user.email;
+                document.getElementById('display-role').innerText = user.role;
+
+                // Isi Foto Profil
+                if (user.profileImage) {
+                    document.getElementById('profile-preview').src = '/uploads/' + user.profileImage;
+                } else {
+                    // Default Avatar (Inisial)
+                    document.getElementById('profile-preview').src = `https://ui-avatars.com/api/?name=${user.name}&background=ea580c&color=fff&size=150`;
+                }
+
+            } catch(e) {
+                console.error(e);
+            }
+        });
+
+        // Preview Gambar sebelum upload
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Simpan Profil
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('address', document.getElementById('address').value);
+            
+            // Cek ada file gambar baru atau tidak
+            const fileInput = document.getElementById('file-input');
+            if(fileInput.files[0]) {
+                formData.append('image', fileInput.files[0]);
+            }
+
+            try {
+                const res = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    body: formData // Content-Type otomatis multipart
+                });
+
+                if(res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Profil berhasil diperbarui',
+                        timer: 1500
+                    }).then(() => location.reload());
+                } else {
+                    throw new Error();
+                }
+            } catch(e) {
+                Swal.fire('Gagal', 'Terjadi kesalahan saat menyimpan', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

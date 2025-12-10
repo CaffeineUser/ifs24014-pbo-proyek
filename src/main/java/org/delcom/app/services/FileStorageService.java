@@ -34,9 +34,6 @@ public class FileStorageService {
         return storeFileInternal(file, String.valueOf(entityId), typePrefix);
     }
 
-    /**
-     * Menyimpan gambar untuk User/Profile (menggunakan UUID)
-     */
     public String storeFile(MultipartFile file, UUID entityId, String typePrefix) {
         return storeFileInternal(file, entityId.toString(), typePrefix);
     }
@@ -46,36 +43,22 @@ public class FileStorageService {
      */
     private String storeFileInternal(MultipartFile file, String identifier, String typePrefix) {
         try {
-            // 1. Validasi File Kosong
-            if (file.isEmpty()) {
-                throw new RuntimeException("Gagal menyimpan file kosong.");
-            }
-
-            // 2. Bersihkan nama file & Ambil Ekstensi
+            if (file.isEmpty()) throw new RuntimeException("Gagal menyimpan file kosong.");
             String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
             String fileExtension = getFileExtension(originalFilename);
-
-            // 3. Validasi Ekstensi (Hanya Gambar)
+            
             if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
                 throw new RuntimeException("Format file tidak didukung. Harap upload: " + ALLOWED_EXTENSIONS);
             }
 
-            // 4. Pastikan folder ada
             Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
 
-            // 5. Generate Nama Baru: menu_123.jpg atau avatar_uuid.png
-            // Menggunakan System.currentTimeMillis() agar browser tidak cache gambar lama jika diupdate
             String newFilename = typePrefix + "_" + identifier + "_" + System.currentTimeMillis() + "." + fileExtension;
-
-            // 6. Simpan File
             Path targetLocation = uploadPath.resolve(newFilename);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             return newFilename;
-
         } catch (IOException ex) {
             throw new RuntimeException("Gagal menyimpan file " + typePrefix, ex);
         }
@@ -83,11 +66,19 @@ public class FileStorageService {
 
     public void deleteFile(String filename) {
         if (filename == null || filename.isEmpty()) return;
+
+        // CEK: Jika ini URL (https://...), JANGAN dihapus karena bukan file lokal
+        if (filename.startsWith("http://") || filename.startsWith("https://")) {
+            System.out.println("Info: Skip delete file karena berupa URL eksternal: " + filename);
+            return; 
+        }
+
         try {
             Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
             Files.deleteIfExists(filePath);
-        } catch (IOException ex) {
-            // Log error tapi jangan throw exception agar tidak mengganggu proses utama
+        } catch (Exception ex) {
+            // Kita catch Exception (bukan cuma IOException) agar aplikasi TIDAK CRASH 
+            // hanya karena gagal hapus file sampah.
             System.err.println("Warning: Gagal menghapus file lama " + filename);
         }
     }

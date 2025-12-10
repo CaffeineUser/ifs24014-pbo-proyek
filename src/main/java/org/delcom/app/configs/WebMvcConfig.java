@@ -50,6 +50,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/login",            // Halaman Login
                         "/register",         // Halaman Register
                         "/api/auth/**",      // API Login/Register
+                        "/api/menu/**",
+                        "/api/categories/**",
                         "/uploads/**",       // Gambar Upload
                         "/css/**",           // File CSS Thymeleaf
                         "/js/**",            // File JS Thymeleaf

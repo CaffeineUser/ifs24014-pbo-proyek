@@ -3,6 +3,8 @@ package org.delcom.app.services;
 import org.delcom.app.entities.User;
 import org.delcom.app.entities.UserRole;
 import org.delcom.app.repositories.UserRepository;
+import org.springframework.web.multipart.MultipartFile;
+import org.delcom.app.services.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,11 @@ public class UserService {
     
     @Autowired
     private PasswordEncoder passwordEncoder; // Pastikan Anda punya SecurityConfig
+
+    @Autowired 
+    private FileStorageService fileStorageService;
     
-    // =================================================================
     // 1. AUTHENTICATION & REGISTRATION
-    // =================================================================
 
     /**
      * Digunakan oleh AuthController untuk Login.
@@ -77,24 +80,35 @@ public class UserService {
         return registerUser(user);
     }
 
-    // =================================================================
     // 2. PROFILE MANAGEMENT
-    // =================================================================
-
+    
     public User getUserById(UUID id) {
         return userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User tidak ditemukan dengan ID: " + id));
     }
 
-    public User updateProfile(UUID userId, String name, String phone, String address) {
+     public User updateProfile(UUID userId, String name, String phone, String address, MultipartFile image) {
         User user = getUserById(userId);
         
         user.setName(name);
         user.setPhone(phone);
         user.setAddress(address);
+
+        // Logic Simpan Gambar Profil
+        if (image != null && !image.isEmpty()) {
+            // Hapus foto lama jika ada (optional, agar hemat storage)
+            if (user.getProfileImage() != null) {
+                fileStorageService.deleteFile(user.getProfileImage());
+            }
+            // Simpan foto baru
+            // Prefix "profile" -> hasil file: profile_UUID_timestamp.jpg
+            String filename = fileStorageService.storeFile(image, userId, "profile");
+            user.setProfileImage(filename);
+        }
         
         return userRepository.save(user);
     }
+
 
     public void changePassword(UUID userId, String oldPassword, String newPassword) {
         User user = getUserById(userId);
@@ -109,9 +123,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // =================================================================
-    // 3. ADMIN FEATURES (USER MANAGEMENT)
-    // =================================================================
+    // 3. ADMIN FEATURES (USER MANAGEMENT)    
     
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -156,4 +168,6 @@ public class UserService {
     public List<User> getActiveUsersByRole(UserRole role) {
         return userRepository.findActiveUsersByRole(role);
     }
+
+
 }

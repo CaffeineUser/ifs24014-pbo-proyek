@@ -95,7 +95,8 @@ public class OrderService {
     }
 
     public Order updateOrderStatus(UUID orderId, OrderStatus newStatus) {
-        Order order = getOrderById(orderId);
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("Order not found"));
         
         // Validasi logika status (opsional)
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.COMPLETED) {
@@ -116,9 +117,19 @@ public class OrderService {
     // Pencarian Multi-kriteria (Untuk halaman Admin Order List)
     public List<Order> searchOrders(String orderNumber, String customerName, String phone, 
                                     OrderStatus status, LocalDateTime startDate, LocalDateTime endDate) {
+        // Start Date default: Tahun 1970
+        if (startDate == null) {
+            startDate = LocalDateTime.of(1970, 1, 1, 0, 0);
+        }
+        
+        // End Date default: Masa depan (misal: 100 tahun lagi)
+        if (endDate == null) {
+            endDate = LocalDateTime.now().plusYears(100);
+        }
         return orderRepository.searchOrders(
             orderNumber, customerName, phone, status, startDate, endDate
         );
+        
     }
 
     public List<Order> getOrdersByStatus(OrderStatus status) {

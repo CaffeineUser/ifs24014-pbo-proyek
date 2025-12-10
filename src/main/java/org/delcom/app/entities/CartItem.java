@@ -3,6 +3,8 @@ package org.delcom.app.entities;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
@@ -12,6 +14,7 @@ public class CartItem {
     
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonIgnore
     private Cart cart;
     
     @ManyToOne

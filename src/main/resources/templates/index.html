@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Ordering System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .hero-pattern {
+            background-color: #fff7ed;
+            background-image: radial-gradient(#ea580c 0.5px, transparent 0.5px);
+            background-size: 10px 10px;
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Fix Dropdown Hover area */
+        .group:hover .group-hover\:block {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow-md fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center"> <!-- Tinggi Navbar sedikit ditambah agar lega -->
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.location.href='/'">
+                    <div class="bg-orange-600 text-white p-2.5 rounded-xl shadow-lg shadow-orange-500/30">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <span class="font-bold text-2xl tracking-tight text-orange-600">DelcomFood</span>
+                </div>
+
+                <!-- Menu Desktop -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="/" class="text-gray-900 font-medium hover:text-orange-600 transition">Beranda</a>
+                    <a href="#menu-section" class="text-gray-500 hover:text-orange-600 transition">Menu</a>
+                    <a href="#" class="text-gray-500 hover:text-orange-600 transition">Kategori</a>
+                </div>
+
+                <!-- User Button / Cart -->
+                <div class="flex items-center gap-4" id="nav-auth-section">
+                    <!-- Loading state -->
+                    <div class="animate-pulse bg-gray-200 h-10 w-32 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="pt-28 pb-16 hero-pattern">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col-reverse md:flex-row items-center">
+            <div class="w-full md:w-1/2 mt-8 md:mt-0 text-center md:text-left">
+                <span class="bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide uppercase mb-6 inline-block shadow-sm">
+                    Lapar? Pesan Sekarang!
+                </span>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+                    Nikmati Makanan <br> <span class="text-orange-600">Terlezat</span> di Kota Ini
+                </h1>
+                <p class="text-gray-600 text-lg mb-8 max-w-lg mx-auto md:mx-0 leading-relaxed">
+                    Pesan makanan favoritmu dengan mudah dan cepat. Diantar hangat sampai ke depan pintu rumahmu.
+                </p>
+                <div class="flex justify-center md:justify-start gap-4">
+                    <a href="#menu-section" class="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-8 py-3.5 rounded-full font-bold shadow-lg hover:shadow-orange-500/40 transition transform hover:-translate-y-1">
+                        Pesan Sekarang
+                    </a>
+                    <button onclick="checkCart()" class="bg-white text-gray-700 border border-gray-200 px-8 py-3.5 rounded-full font-bold hover:bg-gray-50 hover:border-orange-200 transition shadow-sm">
+                        Lihat Keranjang
+                    </button>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 flex justify-center">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-orange-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                         alt="Delicious Food" class="relative rounded-full shadow-2xl w-72 h-72 md:w-[450px] md:h-[450px] object-cover border-8 border-white animate-fade-in-up">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MENU SECTION -->
+    <section id="menu-section" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Header Section -->
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-3">Menu Pilihan</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto">Temukan berbagai hidangan lezat yang kami sajikan khusus untuk Anda.</p>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="bg-white border border-gray-100 rounded-2xl p-6 mb-10 shadow-lg shadow-gray-100/50">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Search -->
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Pencarian</label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Cari makanan (misal: Nasi Goreng)..." 
+                                class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition bg-gray-50">
+                            <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Category -->
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Kategori</label>
+                        <div class="relative">
+                            <select id="categoryFilter" class="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition bg-gray-50 appearance-none cursor-pointer">
+                                <option value="">Semua Kategori</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading & Empty State -->
+            <div id="loadingIndicator" class="hidden text-center py-20">
+                <div class="inline-flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-4"></div>
+                    <span class="text-gray-500 font-medium">Sedang memuat menu lezat...</span>
+                </div>
+            </div>
+
+            <div id="noResults" class="hidden text-center py-20">
+                <div class="inline-flex flex-col items-center bg-gray-50 p-8 rounded-full mb-4">
+                    <i class="fas fa-search text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Menu tidak ditemukan</h3>
+                <p class="text-gray-500">Coba kata kunci lain atau reset filter.</p>
+                <button onclick="resetFilters()" class="mt-4 text-orange-600 font-bold hover:underline">Reset Filter</button>
+            </div>
+
+            <!-- Grid Menu -->
+            <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="bg-orange-600 text-white p-2 rounded-lg">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <span class="font-bold text-2xl tracking-tight">DelcomFood</span>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-6">
+                        Platform pemesanan makanan terbaik dengan pelayanan cepat dan rasa yang tak terlupakan.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-orange-600 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-orange-600 transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-orange-600 transition"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6 border-b border-gray-800 pb-2 inline-block">Tautan Cepat</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="/" class="hover:text-orange-500 transition">Beranda</a></li>
+                        <li><a href="#menu-section" class="hover:text-orange-500 transition">Menu Pilihan</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition">Tentang Kami</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition">Bantuan</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-6 border-b border-gray-800 pb-2 inline-block">Hubungi Kami</h4>
+                    <ul class="space-y-4 text-gray-400">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt mt-1 text-orange-500"></i>
+                            <span>Jl. Delcom Raya No. 123,<br>Kota Laguboti, Indonesia</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone text-orange-500"></i>
+                            <span>+62 812 3456 7890</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-orange-500"></i>
+                            <span>support@delcomfood.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+                <p>&copy; 2025 DelcomFood System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPT -->
+    <script>
+        let isLoggedIn = false;
+        let currentUser = null;
+        let selectedCategory = '';
+        let searchQuery = '';
+        let searchTimeout;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadCategories();
+            await loadMenu();
+            setupEventListeners();
+        });
+
+        // ==========================================
+        // 1. AUTH & NAVBAR (FITUR UTAMA YANG DIMINTA)
+        // ==========================================
+        
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/user/profile');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    isLoggedIn = true;
+                    renderNavLoggedIn();
+                } else {
+                    renderNavGuest();
+                }
+            } catch (e) {
+                renderNavGuest();
+            }
+        }
+
+        function renderNavGuest() {
+            const nav = document.getElementById('nav-auth-section');
+            nav.innerHTML = `
+                <a href="/login" class="text-gray-700 font-medium hover:text-orange-600 transition">Masuk</a>
+                <a href="/register" class="bg-orange-600 text-white px-6 py-2.5 rounded-full font-bold hover:bg-orange-700 shadow-md hover:shadow-orange-500/30 transition">Daftar</a>
+            `;
+        }
+
+        function renderNavLoggedIn() {
+            const nav = document.getElementById('nav-auth-section');
+            
+            const adminLink = (currentUser.role === 'ADMIN' || currentUser.role === 'STAFF') 
+                ? `<a href="/admin" class="block px-4 py-2.5 text-orange-600 font-bold hover:bg-orange-50 transition rounded-lg mb-1"><i class="fa-solid fa-gauge-high w-6"></i> Admin Panel</a>` 
+                : '';
+
+            // LOGIC GAMBAR PROFIL
+            const avatarSrc = currentUser.profileImage 
+                ? (currentUser.profileImage.startsWith('http') ? currentUser.profileImage : `/uploads/${currentUser.profileImage}`)
+                : `https://ui-avatars.com/api/?name=${currentUser.name}&background=ea580c&color=fff&size=128`;
+
+            nav.innerHTML = `
+                <!-- DROPDOWN WRAPPER -->
+                <div class="relative group h-full flex items-center">
+                    
+                    <!-- TRIGGER BUTTON -->
+                    <button class="flex items-center gap-3 font-medium focus:outline-none transition hover:bg-gray-100 py-1.5 px-2 pr-4 rounded-full border border-transparent hover:border-gray-200">
+                        <img src="${avatarSrc}" class="w-9 h-9 rounded-full object-cover border border-gray-300 shadow-sm" onerror="this.src='https://ui-avatars.com/api/?name=User'">
+                        <div class="text-left hidden sm:block">
+                            <p class="text-sm font-bold text-gray-800 leading-none">${currentUser.name.split(' ')[0]}</p>
+                            <p class="text-[10px] text-gray-500 font-medium">${currentUser.role}</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 ml-1 transition-transform duration-300 group-hover:rotate-180"></i>
+                    </button>
+                    
+                    <!-- DROPDOWN MENU -->
+                    <!-- pt-4 adalah kunci agar tidak ada gap (jembatan tak terlihat) -->
+                    <div class="absolute right-0 top-full pt-4 w-64 hidden group-hover:block z-50 transform origin-top-right transition-all duration-200">
+                        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden ring-1 ring-black ring-opacity-5">
+                            
+                            <!-- Header Dropdown -->
+                            <div class="px-5 py-4 bg-gray-50 border-b border-gray-100">
+                                <p class="text-sm font-bold text-gray-900 truncate">${currentUser.name}</p>
+                                <p class="text-xs text-gray-500 truncate">${currentUser.email}</p>
+                            </div>
+
+                            <!-- Menu Items -->
+                            <div class="p-2">
+                                ${adminLink}
+                                <a href="/my-orders" class="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg text-sm transition font-medium">
+                                    <i class="fa-solid fa-receipt w-6 text-gray-400"></i> Pesanan Saya
+                                </a>
+                                <a href="/profile" class="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg text-sm transition font-medium">
+                                    <i class="fa-solid fa-user-gear w-6 text-gray-400"></i> Edit Profil
+                                </a>
+                            </div>
+                            
+                            <!-- Footer Dropdown -->
+                            <div class="p-2 border-t border-gray-100 bg-gray-50/50">
+                                <button onclick="logout()" class="block w-full text-left px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg text-sm font-bold transition">
+                                    <i class="fa-solid fa-sign-out-alt w-6"></i> Keluar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CART BUTTON -->
+                <button onclick="checkCart()" class="relative w-10 h-10 flex items-center justify-center text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-full transition ml-2">
+                    <i class="fa-solid fa-cart-shopping text-lg"></i>
+                </button>
+            `;
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        // ==========================================
+        // 2. MENU LOGIC & FILTER
+        // ==========================================
+
+        function setupEventListeners() {
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    searchQuery = e.target.value.trim();
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => { loadMenu(); }, 500);
+                });
+            }
+            
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', function(e) {
+                    selectedCategory = e.target.value;
+                    loadMenu();
+                });
+            }
+        }
+
+        async function loadCategories() {
+            try {
+                const res = await fetch('/api/categories');
+                if (!res.ok) throw new Error();
+                const categories = await res.json();
+                const select = document.getElementById('categoryFilter');
+                
+                select.innerHTML = '<option value="">Semua Kategori</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            } catch(e) {}
+        }
+
+        async function loadMenu() {
+            const grid = document.getElementById('menu-grid');
+            const loading = document.getElementById('loadingIndicator');
+            const noResults = document.getElementById('noResults');
+            
+            loading.classList.remove('hidden');
+            grid.innerHTML = '';
+            noResults.classList.add('hidden');
+
+            try {
+                let url = '/api/menu';
+                const params = new URLSearchParams();
+                if (searchQuery) params.append('keyword', searchQuery);
+                if (selectedCategory) params.append('categoryId', selectedCategory);
+                if (params.toString()) url = `/api/menu/search?${params.toString()}`;
+
+                const response = await fetch(url);
+                let menus = await response.json();
+                
+                // Filter ketersediaan & Client side filtering fallback
+                menus = menus.filter(m => {
+                    const matchSearch = !searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase());
+                    const matchCat = !selectedCategory || (m.category && m.category.id == selectedCategory);
+                    return matchSearch && matchCat && m.available !== false;
+                });
+
+                loading.classList.add('hidden');
+
+                if (menus.length === 0) {
+                    noResults.classList.remove('hidden');
+                    return;
+                }
+
+                menus.forEach(menu => {
+                    // FORMAT HARGA
+                    const priceFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(menu.price);
+                    
+                    // GAMBAR MENU (LOGIC BENAR)
+                    const imageSrc = menu.imageUrl 
+                        ? (menu.imageUrl.startsWith('http') ? menu.imageUrl : `/uploads/${menu.imageUrl}`)
+                        : `https://placehold.co/400x300/fff7ed/ea580c?text=${encodeURIComponent(menu.name)}`;
+
+                    const catName = menu.category ? menu.category.name : 'Umum';
+
+                    grid.innerHTML += `
+                        <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full animate-fade-in-up">
+                            <div class="relative h-56 overflow-hidden flex-shrink-0">
+                                <img src="${imageSrc}" alt="${menu.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-white/90 backdrop-blur-sm text-orange-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                                        ${catName}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-5 flex flex-col flex-1">
+                                <h3 class="font-bold text-lg text-gray-900 mb-2 line-clamp-1" title="${menu.name}">${menu.name}</h3>
+                                <p class="text-gray-500 text-sm mb-4 line-clamp-2 flex-1">${menu.description || 'Menu lezat pilihan kami.'}</p>
+                                
+                                <div class="flex justify-between items-end mt-auto pt-4 border-t border-gray-50">
+                                    <div>
+                                        <span class="text-xl font-extrabold text-orange-600">${priceFormatted}</span>
+                                    </div>
+                                    <button onclick="addToCart(${menu.id})" class="bg-gray-900 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-600 transition shadow-lg hover:shadow-orange-500/30 group">
+                                        <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                loading.classList.add('hidden');
+                grid.innerHTML = '<p class="text-center col-span-full text-red-500">Gagal memuat menu. Cek koneksi server.</p>';
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            searchQuery = '';
+            selectedCategory = '';
+            loadMenu();
+        }
+
+        // ==========================================
+        // 3. CART LOGIC
+        // ==========================================
+
+        async function addToCart(menuId) {
+            if (!isLoggedIn) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Login Dulu',
+                    text: 'Silakan login untuk memesan.',
+                    confirmButtonText: 'Login',
+                    confirmButtonColor: '#ea580c',
+                    showCancelButton: true
+                }).then((r) => { if(r.isConfirmed) window.location.href = '/login'; });
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/cart/items', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ menuItemId: menuId, quantity: 1 })
+                });
+
+                if (response.ok) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        background: '#10b981',
+                        color: '#fff'
+                    });
+                    Toast.fire({ icon: 'success', title: 'Masuk keranjang!' });
+                } else throw new Error();
+            } catch (e) {
+                Swal.fire('Gagal', 'Tidak bisa menambah item', 'error');
+            }
+        }
+
+        function checkCart() {
+            if(isLoggedIn) window.location.href = '/cart';
+            else Swal.fire({ icon: 'info', title: 'Login Dulu', text: 'Silakan login untuk melihat keranjang', confirmButtonColor: '#ea580c' }).then((r) => { if(r.isConfirmed) window.location.href = '/login'; });
+        }
+    </script>
+</body>
+</html>

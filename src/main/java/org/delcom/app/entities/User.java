@@ -1,11 +1,14 @@
 package org.delcom.app.entities;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Entity
@@ -33,9 +36,15 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.CUSTOMER;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Order> orders = new ArrayList<>();
     
     private LocalDateTime createdAt;
     private boolean enabled = true;
+
+    private String profileImage;
     
     @PrePersist
     protected void onCreate() {
@@ -69,6 +78,17 @@ public class User {
     
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
+
+    public String getProfileImage() { return profileImage; }
+    public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
     
     // Helper methods for Spring Security
     public Collection<UserRole> getAuthorities() {
